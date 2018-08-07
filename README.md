@@ -1,19 +1,27 @@
-# WebpackSplitApp
+# Webpack Code Splitting with Phoenix Digest
 
-To start your Phoenix server:
+## Background
 
-  * Install dependencies with `mix deps.get`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
+Webpack enables [dynamic importing and automatically generated chunks](https://webpack.js.org/guides/code-splitting/#dynamic-imports). This make automatic code splitting very easy for SPAs.
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+However, although seemly working with fine with Phoenix, the automatically generated webpack chunks are not digested. This repo demostrate the issue.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+Make sure you clone this repo in the [development phoenix](https://github.com/phoenixframework/phoenix#generating-a-phoenix-project-from-unreleased-versions)'s installer folder for the official webpack support in the unreleased Phoenix version.
 
-## Learn more
+## Development
 
-  * Official website: http://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+In development everything should look normal since nothing is digested. When going to http://localhost:4000 you should see a magical "Loaded" message in your console.
+
+## Problem in Production
+
+Now the issue comes in in the production version:
+
+1.  Compile the production server: `MIX_ENV=prod mix compile` to compile
+2.  Build assets: `cd assets; webpack --mode production`
+3.  Digest assets: Back into the repo folder and run `mix phx.digest`
+4.  Start server: `PORT=4001 MIX_ENV=prod mix phx.server`
+5.  Go to http://localhost:4001.
+
+In the console you will still see the magical `Loaded` message. But when you inspect the network you will see a undigested version of chunk file was used.
+
+![](./network.png)
